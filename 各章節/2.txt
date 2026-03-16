@@ -1,0 +1,145 @@
+\chapter{相關理論與文獻回顧}
+
+在任何由節點與邊交織而成的網絡中，我們往往能同時看見兩種面貌：一種是緊密、在地而熟悉的互動；另一種則像是跨越距離、悄悄把兩個區域連在一起的細線。複雜網絡研究之所以逐漸成為理解多種系統的重要框架，正是因為它能從這些看似微小的連結之間，讀出整體結構如何形成、群體之間如何互動，以及全局行為如何在許多局部關係的組合下展現。
+
+本章將首先介紹圖論與複雜網絡的基本概念，包含小世界、群聚係數、網絡不均質性等拓樸特性。接著回顧社會學中強弱連結的經典觀察，並整理後續在橋接邊、結構洞、共同鄰居等概念的形式化進展。最後，透過系統性的文獻回顧，說明近五年來邊分類、局部密度與社群偵測、以及邊特徵在圖學習中的應用脈絡，進一步定位本研究提出之 Local-Density HETA 的重要性與創新性。
+
+\section{圖論與網絡的基礎}
+
+複雜網絡的所有分析皆建構在最基本的圖論架構之上。圖 $G = (V, E)$ 由節點 $V$ 與邊 $E$ 組成，而節點之間的連結可透過鄰接矩陣 $A$ 描述。鄰接矩陣平方後，$A^2$ 的元素代表兩節點間長度為二的路徑數，使可達性分析更具體化。
+
+此外，關節點（articulation point）與橋（bridge）等概念，有助於理解哪些節點或邊對維持網絡連通性至關重要。移除此類元素可能造成網絡分裂，顯示其在整體結構中的不可替代性。
+
+\section{複雜網絡的核心拓樸特性}
+
+複雜網絡之所以能描繪多種自然與人造系統，是因為許多網絡呈現出共通的拓樸結構特性，包括小世界性、群聚現象以及度分布不均質性等。本節逐一介紹相關概念。
+
+\subsection{小世界特性}
+
+Milgram 的六度分隔實驗揭示社會網絡的平均距離遠小於直覺。Watts 與 Strogatz 模型指出多數真實網絡具有高群聚度與低平均最短路徑，使資訊得以在網絡中快速擴散。
+
+在 HETA 中，階層深度 $k_{\max}$ 的設定便以平均最短路徑長度為基準，通常採用其一半，避免替代性計算超出網絡自然尺度。
+
+\subsection{群聚係數與三角閉合}
+
+群聚係數描述節點的鄰居之間是否互相連結，反映網絡存在局部團塊（triangle closure）。此概念在人際網絡中尤為常見，是後續理解強連結、弱連結與共同鄰居的重要基礎。
+
+\subsection{度分布與網絡不均質性}
+
+許多真實網絡呈現冪律分布，其中少部分節點具有極高的度數（hub），造成結構高度不均質。這種差異使不同區域的「局部密度」可能相差甚大，而這正是本研究所關注的密度異質性挑戰之一。
+
+\section{強連結與弱連結的社會學基礎}
+
+Granovetter 在《The Strength of Weak Ties》中指出強連結通常代表高互動與高重疊的朋友圈，而弱連結則因其跨越不同社群而具有橋接效應。弱連結雖互動頻率低，但往往是資訊、資源與新機會的關鍵來源。
+
+Putnam 將其延伸為 bonding 與 bridging，前者強化群體凝聚力，後者則強化跨群體流動性。Burt 的結構洞（structural holes）理論則說明能跨越社群空隙者具有資訊優勢。
+
+這些社會學概念後來在網絡科學中被逐步形式化，發展出 local bridge、global bridge、motif-bridge 等邊類型分析方法。
+
+\section{橋接邊與替代路徑的重要性}
+
+在複雜網絡中，某些邊雖不顯眼，卻主導不同社群間的連結。Granovetter 的 local bridge 定義指出，若移除某條邊會使兩節點距離大幅增加，則該邊具有橋接性。
+
+後續研究中，Jensen 等人以分解介數中心性（betweenness decomposition）分析 global bridges；Huang 等人則指出某些 motif 天生具有跨模組連結功能。
+
+這些研究共同指出：\textbf{橋接邊在資訊流動與網絡穩定中扮演核心角色。}
+
+\section{共同鄰居與階層式結構：HETA 的理論基礎}
+
+HETA（Hierarchical Edge Type Analysis）以共同鄰居比例（CNR）衡量邊的替代性。若兩端節點有許多共同鄰居，表示存在高替代性，該邊可能是 bond；若共同鄰居稀少，則可能為 local 或 global bridge。
+
+HETA 的理論特色：
+
+\begin{itemize}
+    \item 引入多層鄰居（$k$-layer neighbors）分析不同尺度的替代性；
+    \item $k_{\max}$ 基於平均路徑長度，符合網絡自然尺度；
+    \item 與隨機化網絡比較以建立內部與外部閾值（$TI^k$, $TE^k$）；
+    \item 將邊分類為 silk、bond、local bridge、global bridge 四類。
+\end{itemize}
+
+然而，HETA 假設網絡密度均勻，未考慮區域密度差異在邊判定中的重要性。
+
+\section{既有方法的限制：密度異質性的問題}
+
+在高度異質的網絡中使用統一的 CNR 閾值，可能造成如下偏誤：
+
+\begin{itemize}
+    \item 高密度區因共同鄰居多，使大量邊被誤判為 bond；
+    \item 低密度區因共同鄰居少，使關鍵邊被誤判為 global bridge；
+    \item 相同 CNR 值在不同區域的語義並不一致。
+\end{itemize}
+
+近年的研究強調 local density、local structure 在社群、模組、資訊流動中的重要性，但相關概念尚未正式引入邊分類方法。
+
+\section{邊類型與橋接邊的近年研究（2020 之後）}
+
+近年邊分類（edge classification）呈現兩大主要方向：  
+（1）以鄰域重疊與三元閉包為主的「替代性」觀點；  
+（2）以網絡韌性、攻擊序列為主的「重要性」觀點。
+
+\subsection{Triadic Closure 與鄰域重疊的邊分類}
+
+Meghanathan（2023）提出以「鄰域重疊（neighborhood overlap）」與「強三元閉包（strong triadic closure）」為基礎的邊分類方法，並透過二分搜尋法提升效率。此方法與 CNR 的替代性概念具有高度相似性，代表此方向仍是近年的主流。
+
+\subsection{邊的重要性排序與攻擊序列}
+
+Chen 等人（2023）提出 SHEAR 架構，以深度強化學習自動尋找複雜網絡中的「高價值攻擊邊序列」。此方法本質上是一種「邊的重要性排序」，意在發現對網絡影響最大的邊。
+
+\subsection{弱邊與網絡韌性}
+
+Ding 等人（2025）從 weak graph/edge consolidation 的角度研究弱連結在維持網絡韌性中的角色，指出弱邊常是關鍵結構穩定性的來源，其觀察與 Granovetter 與 HETA 的 global bridge 脈絡相呼應。
+
+\section{局部密度與社群偵測的近年研究（2022 之後）}
+
+local density 已成為社群偵測與模組分析的重要特徵，但現有研究大多集中於 node-level 或 community-level，而非 edge-level。
+
+\subsection{Local Intrinsic Density}
+
+Nath（2022）提出 local intrinsic density，透過鄰域度數變異（degree variation）與最小生成樹（MST）結構偵測社群，顯示局部密度是衡量結構位置的有效指標。
+
+\subsection{Density-Peak 增強方法}
+
+Chen（2022）重新定義複雜網絡中的 local density，並用於 density peak clustering，使社群中心的選取更穩定。
+
+\subsection{重疊社群中的自適應密度}
+
+Niu（2023）使用 adaptive density 進行重疊社群偵測，展示密度調整在複雜結構中的實際效果。
+
+\subsection{Local Density 的綜論}
+
+Diboune 等人（2024）在最新社群偵測綜論中強調 adaptive local density 在新演算法中的核心地位，指出其對複雜網絡分析將愈加重要。
+
+\subsection{Local Density 與 Label Propagation 的整合}
+
+Liu（2025）提出 NSLS 方法，整合 local density 與 label propagation，顯示近年演算法普遍將「local density + local similarity」聯合使用。
+
+\section{邊特徵與圖學習（GNN）中的新趨勢}
+
+近年不少圖神經網絡（GNN）開始將「邊特徵」納入模型，包括 local similarity、global similarity、degree-based features 等。
+
+\subsection{結構相似度作為邊特徵}
+
+Kumar（2023）提出 ENGAT，將 local/global similarity 作為邊特徵，用於微表情辨識，顯示邊結構的 representation-learning 趨勢。
+
+\subsection{GNN 連結預測中的邊特徵}
+
+Gharsallah（2025）在 link prediction 中明確使用 Jaccard similarity、degree-based features 作為邊嵌入的基礎，顯示 edge-level structural signals 已成為主流方向。
+
+\section{研究缺口與本研究的動機}
+
+綜合上述文獻可得以下觀察：
+
+\begin{itemize}
+    \item \textbf{邊分類研究} 多沿 triadic closure（鄰域重疊）與網絡韌性（攻擊邊序列）兩路線發展；
+    \item \textbf{local density 研究} 在 node-level、community-level 表現非常活躍，但缺乏 edge-level 形式化應用；
+    \item \textbf{GNN 趨勢} 開始重視 edge-level 結構特徵，但尚未採用 density-aware signals。
+\end{itemize}
+
+因此，本研究的缺口清晰可見：  
+\textbf{現有方法從未將「局部密度異質性」引入邊的階層替代性判定。}
+
+HETA 能描述不同層級的替代性，但忽略了局部密度差異對 CNR 的語義影響。本研究提出 Local-Density HETA（LD-HETA），在 HETA 中導入局部密度調整，使每條邊的分類能兼顧全域結構與其所在區域的密度語義。
+
+本研究的核心動機在於：  
+\textbf{透過引入 local-density adaptive threshold，使強／弱連結的判定由「全域固定」轉為「區域敏感」，從而在高度異質的真實網絡中得到更具語義的邊分類結果。}
+

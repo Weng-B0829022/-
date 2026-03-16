@@ -1,0 +1,308 @@
+\chapter{研究方法（Methodology）}
+
+在前兩章的鋪陳裡，我們逐漸看見邊在複雜網絡中的角色並不單一。有些邊只是群體內的自然堆疊，有些邊則意外撐起了兩個區域之間的連結，而少數邊甚至影響整張網絡的整體形狀。這些差異，在社會學的語境裡可以透過強連結、弱連結、橋接關係等概念說明；但若要精準、客觀地判定一條邊在網絡中的作用，則需要更系統化的方法。HETA（Hierarchical Edge Type Analysis）便是在這樣的背景下被提出，它將共同鄰居延伸到多層次結構，使邊的角色能在不同尺度下被觀察。本章將先重新回顧 HETA 的完整邏輯，再進一步說明本研究提出 Local-Density HETA（LD-HETA）的理由、核心想法與具體方法。
+
+\section{HETA 回顧}
+
+HETA 的核心目的，是希望能從「替代性（replaceability）」的角度理解邊的角色。如果兩個節點之間存在許多替代路徑，那麼它們之間的直接連結相對不重要；反之，如果缺乏替代路徑，即使邊本身不強烈，它仍可能承擔結構性的功能。這個想法源自社會網絡研究，但 HETA 將它系統化，使其能在任意網絡中運作。
+
+\subsection{階層式共同鄰居的想法}
+
+在 HETA 中，最基本的量測是第一層共同鄰居——即兩端點的直接鄰居的重疊部分。然而，只看第一層往往不足，因為一些跨社群的邊即使第一層共同鄰居很少，第二層、第三層的替代路徑仍可能存在。因此 HETA 由內而外擴展鄰域，形成 $k$-layer common neighbors 的概念。
+
+一般而言，$k=1$ 反映鄰近、局部的群聚情形；$k$ 越大，越能捕捉到中距離甚至跨社群的替代路徑。這種按距離逐層向外的設計，使得 HETA 能看見不同尺度下的結構意義，而非只依賴單一層級的資訊。
+
+\subsection{階層深度為何設為 $k_{\max} = \lfloor L/2 \rfloor$}
+
+HETA 使用網絡平均最短路徑長度 $L$ 作為衡量網絡尺度的指標，並將最大層級設定為 $L$ 的一半。這個選擇表面上是經驗設計，實際上帶有深刻的網絡理論背景：
+
+\begin{itemize}
+    \item 平均距離 $L$ 代表節點間一般的最可能距離；
+    \item 遠於 $L/2$ 的關係往往不具強烈的區辨能力（因為層級過深時，多數節點會彼此可達）；
+    \item 以 $L/2$ 作為結構半徑，既能捕捉重要的中距替代路徑，又能避免不必要的層級膨脹。
+\end{itemize}
+
+因此，$k_{\max}$ 的設計使 HETA 的階層分析與網絡自然尺度緊密連結，不會因為使用過深的層級而稀釋替代性的判斷。
+
+\subsection{四種類別的含義}
+
+HETA 將邊歸類為四個類別，每個類別都具有明確且可解釋的行為意義。
+
+\subsubsection{Silk links}
+
+Silk links 是與度數為 1 的節點相連的邊。這類邊完全沒有替代性，其意義是「結構邊界的末端」。這些邊通常不參與橋接功能，但能顯示某些節點在網絡中的孤立程度，或是資料中的稀疏尾端結構。
+
+\subsubsection{Bond links}
+
+Bond links 是替代性最高的一群邊，通常具有極高的共同鄰居比例。這類邊常出現在密集社群內部，反映極強的黏著度。對於社群偵測而言，bond links 可能是社群的核心骨架，但對全局連結則較不重要。
+
+\subsubsection{Local bridges}
+
+Local bridges 是那些在某一層級缺乏替代性的邊。它們並不一定影響全局結構，但在區域層級上承擔著兩個子群體的連接功能。有時候，一條邊在第一層看起來不重要，但在第二或第三層才展現其橋接作用，HETA 的階層式設計正是為了捕捉這些細緻差異。
+
+\subsubsection{Global bridges}
+
+Global bridges 是跨越整張網絡的重要連結。這些邊往往將兩個大型社群或網絡區域連在一起，替代路徑極少或非常長。它們的存在決定了網絡是否由多個社群拼接而成，或是具有統一的整體結構。這類邊的去除可能造成分群、分裂或大幅增加平均距離。
+
+\subsection{門檻的統計意義}
+
+HETA 的門檻設計是一個關鍵。為了讓每個層級的共同鄰居比例具有統計背景，HETA 使用了大量保留度數分布的隨機網絡，建立每層可能出現的 CNR 分布，並以此推得內部與外部門檻。
+
+這些門檻的意義如下：
+
+\begin{itemize}
+    \item 若 CNR 高於外部門檻：代表比大多數隨機結構更具替代性；
+    \item 若 CNR 低於內部門檻：代表比大多數隨機結構更缺乏替代性；
+    \item 若介於兩者之間：替代性不明顯，由較深層級決定最終分類。
+\end{itemize}
+
+在完備的隨機化比較下，HETA 能以多層級資訊為基礎，給出一條邊在不同尺度下的結構角色。
+
+\section{LD-HETA 的提出理由}
+
+儘管 HETA 能夠捕捉跨層級的替代性問題，其核心仍然依賴共同鄰居比例，而共同鄰居比例在本質上不是一個能夠跨密度區域直接比較的量。這是 LD-HETA 要處理的最重要問題。
+
+\subsection{CNR 在不同密度區域的失真}
+
+為了說明 CNR 會如何失真，我們可以想像兩個簡單的網絡片段：
+
+\begin{itemize}
+    \item 在一個稠密的社群裡，十個共同鄰居並不特別，因為所有節點彼此連結本來就相當頻繁；
+    \item 在一個稀疏的社群裡，三個共同鄰居可能已經代表一種高度的結構重疊。
+\end{itemize}
+
+換句話說，**相同的共同鄰居數量在不同環境中具有完全不同的意義**。  
+若使用同一個全域門檻比較，CNR 的判定就會出現偏差。
+
+\subsection{HETA 的隱含假設：全域一致性}
+
+在 HETA 的設計裡，所有 CNR 都與同一組門檻比較。這等於假設所有區域的密度背景是一致的。
+
+
+然而，現實網絡往往由若干稠密區與稀疏區構成，甚至呈現強烈的模塊化結構。這些差異會直接影響 CNR 的語意，使得原本的替代性判斷不夠穩定。
+
+\subsection{LD-HETA 的核心概念：區域語意一致性}
+
+LD-HETA 的提出在於希望建立一個「區域語意一致」的邊強弱判定框架：
+
+\begin{itemize}
+    \item CNR 不再以絕對數值比較，而是以相對於其區域密度的量化結果比較；
+    \item 門檻不再是全域固定，而是根據每條邊所處的密度環境調整；
+    \item 替代性判定在稠密區與稀疏區都具有一致的意義。
+\end{itemize}
+
+這使得 LD-HETA 在處理不同區塊密度的網絡時更為合理，也能更準確捕捉弱連結與橋接邊。
+
+\section{局部密度定義與閾值調整}
+
+LD-HETA 的核心在於「局部密度背景」。本節將詳細說明本研究如何定義局部密度，以及其如何作用於門檻調整。
+
+\subsection{局部密度的定義}
+
+本研究將一條邊 $(i,j)$ 的局部密度視為「其鄰域結構的壓縮程度」。具體而言，我們以 $i$ 與 $j$ 在 $k$ 層鄰域中的所有節點形成的子網絡，計算其密度：
+
+\[
+D_{ij}^{(k)} = \frac{2E_{ij}^{(k)}}{N_{ij}^{(k)}\left(N_{ij}^{(k)}-1\right)},
+\]
+
+其中 $E_{ij}^{(k)}$ 為該子網絡中的邊數，$N_{ij}^{(k)}$ 為節點數。此定義能反映節點周圍的結構緊密度，也能避免只使用單一節點密度造成的偏誤。
+
+多層級密度會以加權方式整合：
+
+\[
+D_{ij} = \sum_{k=1}^{k_{\max}} w_k D_{ij}^{(k)},
+\]
+
+其中 $w_k$ 為層級權重，本研究採用距離遞減的方式配置，使較近層級具有更大權重。
+
+\subsection{密度調整函式}
+
+局部密度越高，替代性在 CNR 中理應越高標準；密度越低，替代性標準應降低。基於此，本研究定義密度調整函式：
+
+\[
+f(D_{ij}) = 1 + \alpha(D_{ij} - \bar{D}),
+\]
+
+其中 $\bar{D}$ 為全局平均密度，$\alpha$ 用於控制調整幅度。
+
+若 $D_{ij} > \bar{D}$，則 $f(D_{ij}) > 1$，門檻上升；  
+若 $D_{ij} < \bar{D}$，則 $f(D_{ij}) < 1$，門檻下降。
+
+\subsection{調整後的門檻}
+
+HETA 原本的門檻 $\{T_E^{(k)}, T_I^{(k)}\}$ 經密度調整後變為：
+
+\[
+\tilde{T}_E^{(k)} = T_E^{(k)} \cdot f(D_{ij}),
+\]
+\[
+\tilde{T}_I^{(k)} = T_I^{(k)} \cdot f(D_{ij}).
+\]
+
+如此便能使 CNR 的比較更適應其區域背景，使 LD-HETA 能在密度異質網絡中運作。
+
+\section{演算法流程與pseudocode}
+
+本節將完整描述 LD-HETA 的運作流程，從資料輸入到邊類型輸出。
+
+\subsection{流程敘述}
+
+\begin{enumerate}
+    \item 計算最短路徑長度，設定有效階層深度。
+    \item 為每條邊計算各層級的共同鄰居比例。
+    \item 為每條邊計算局部密度。
+    \item 建立隨機網絡，取得各層級原始門檻。
+    \item 依據局部密度調整門檻。
+    \item 依序判定每條邊在不同層級的替代性。
+    \item 將各層級結果整合為最終邊類型。
+\end{enumerate}
+
+\subsection{pseudocode}
+
+\begin{algorithm}[H]
+\caption{Local-Density HETA (LD-HETA)}
+\KwIn{Network $G(V,E)$; Number of randomized networks $M$; Layer weights $\{w_k\}$; Density coefficient $\alpha$}
+\KwOut{Edge type of every $(i,j)\in E$: \{silk, bond, local bridge, global bridge\}}
+
+% -------------------------------------------------------
+\BlankLine
+\textbf{Step 1: Preprocessing (Distances and Hierarchy Levels)}\\
+Compute all-pairs shortest paths of $G$ (via BFS/Floyd–Warshall)\;
+Compute average shortest path length $L$\;
+Set maximum hierarchy depth $k_{\max} \leftarrow \lfloor L/2 \rfloor$\;
+
+% -------------------------------------------------------
+\BlankLine
+\textbf{Step 2: Compute HETA Common Neighbor Ratios ($R_{ij}^{(k)}$)}\\
+\ForEach{edge $(i,j)\in E$}{
+    \For{$k=1$ \KwTo $k_{\max}$}{
+        Compute $V_i^{k,j}$ and $V_j^{k,i}$ following HETA definitions\;
+        
+        \If{$k=1$}{
+            % First-layer HETA formula
+            $R_{ij}^{(1)} \leftarrow 
+            \dfrac{\left|V_i^{1,j} \cap V_j^{1,i}\right|}
+                  {\min\left(\left|V_i^{1,j}\right|, \left|V_j^{1,i}\right|\right)}$ \;
+        }
+        \Else{
+            % Multi-layer HETA formula
+            Compute three intersections:
+            $\;A = V_i^{k,j} \cap V_j^{k,i}$\;
+            $\;B = V_i^{k-1,j} \cap V_j^{k,i}$\;
+            $\;C = V_i^{k,j} \cap V_j^{k-1,i}$\;
+
+            Compute corresponding denominators:
+            $\;a = \min(|V_i^{k,j}|,|V_j^{k,i}|)$\;
+            $\;b = \min(|V_i^{k-1,j}|,|V_j^{k,i}|)$\;
+            $\;c = \min(|V_i^{k,j}|,|V_j^{k-1,i}|)$\;
+
+            \If{$A \cup B \cup C = \emptyset$}{
+                $R_{ij}^{(k)} \leftarrow 0$\;
+            }
+            \Else{
+                $R_{ij}^{(k)} \leftarrow
+                \dfrac{|A|+|B|+|C|}{a+b+c}$\;
+            }
+        }
+    }
+}
+
+% -------------------------------------------------------
+\BlankLine
+\textbf{Step 3: Compute Multi-layer Local Density $D_{ij}$}\\
+\ForEach{edge $(i,j)$}{
+    \For{$k = 1$ \KwTo $k_{\max}$}{
+        Construct node set $S_{ij}^{(k)} = V_i^{k,j} \cup V_j^{k,i}$\;
+        Build induced subgraph $G_{ij}^{(k)}$ on $S_{ij}^{(k)}$\;
+        Let $N_{ij}^{(k)} = |S_{ij}^{(k)}|$, $E_{ij}^{(k)} =$ number of edges in $G_{ij}^{(k)}$\;
+
+        Compute density:
+        \[
+        D_{ij}^{(k)} = 
+        \frac{2E_{ij}^{(k)}}{N_{ij}^{(k)} (N_{ij}^{(k)} - 1)}
+        \]
+    }
+    Compute weighted multi-layer density:
+    \[
+    D_{ij} = \sum_{k=1}^{k_{\max}} w_k\, D_{ij}^{(k)}
+    \]
+}
+
+% -------------------------------------------------------
+\BlankLine
+\textbf{Step 4: Randomized Networks for HETA Thresholds}\\
+Generate $M$ randomized networks $\{G^{(m)}\}$ preserving degree distribution\;
+\ForEach{$G^{(m)}$}{
+    Recompute $R_{ij}^{(k,m)}$ for all edges and all $k$\;
+}
+Construct empirical distributions of $R_{ij}^{(k,m)}$ for each $k$\;
+Define original HETA thresholds:
+\[
+T_E^{(k)} = \text{upper percentile (e.g., 97.5\%)}
+\]
+\[
+T_I^{(k)} = \text{lower percentile (e.g., 2.5\%)}
+\]
+
+% -------------------------------------------------------
+\BlankLine
+\textbf{Step 5: Density-adjusted Thresholds}\\
+Compute global mean density $\bar{D}$ over all edges\;
+\ForEach{edge $(i,j)$}{
+    Define density adjustment:
+    \[
+    f(D_{ij}) = 1 + \alpha(D_{ij} - \bar{D})
+    \]
+    \For{$k = 1$ \KwTo $k_{\max}$}{
+        Raw adjusted thresholds:
+        \[
+        \widehat{T}_E^{(k)} = T_E^{(k)} \cdot f(D_{ij}),
+        \quad
+        \widehat{T}_I^{(k)} = T_I^{(k)} \cdot f(D_{ij})
+        \]
+        
+        Clip to $[0,1]$:
+        \[
+        \tilde{T}_E^{(k)} = \min(1,\max(0,\widehat{T}_E^{(k)})),
+        \quad
+        \tilde{T}_I^{(k)} = \min(1,\max(0,\widehat{T}_I^{(k)}))
+        \]
+    }
+}
+
+% -------------------------------------------------------
+\BlankLine
+\textbf{Step 6: Final Edge Classification}\\
+\ForEach{edge $(i,j)$}{
+    \If{$\deg(i)=1$ \textbf{or} $\deg(j)=1$}{
+        Label $(i,j)$ as \textbf{silk link}\;
+        \Continue
+    }
+
+    bond\_flag $\leftarrow$ false\;
+    local\_flag $\leftarrow$ false\;
+
+    \For{$k = 1$ \KwTo $k_{\max}$}{
+        \If{$R_{ij}^{(k)} \ge \tilde{T}_E^{(k)}$}{
+            bond\_flag $\leftarrow$ true\;
+        }
+        \If{$\tilde{T}_I^{(k)} \le R_{ij}^{(k)} < \tilde{T}_E^{(k)}$}{
+            local\_flag $\leftarrow$ true\;
+        }
+    }
+
+    \If{bond\_flag}{
+        Label $(i,j)$ as \textbf{bond link}\;
+    }
+    \ElseIf{local\_flag}{
+        Label $(i,j)$ as \textbf{local bridge}\;
+    }
+    \Else{
+        Label $(i,j)$ as \textbf{global bridge}\;
+    }
+}
+
+\Return all edge types\;
+
+\end{algorithm}
+
