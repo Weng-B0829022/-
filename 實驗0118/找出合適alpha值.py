@@ -75,7 +75,7 @@ def run_analysis_logic(G, alpha=0.1):
     R_vals = {k: {e: calculate_R_ij_k(G, e[0], e[1], k) for e in edges} for k in range(1, k_max + 1)}
     D_vals = {k: {e: calculate_LD_ij_k(G, e[0], e[1], k) for e in edges} for k in range(1, k_max + 1)}
     Avg_D = {k: np.mean(list(D_vals[k].values())) if D_vals[k] else 0 for k in range(1, k_max + 1)}
-    T_E_base = {k: np.mean(list(R_vals[k].values())) + 0.5 * np.std(list(R_vals[k].values())) for k in range(1, k_max + 1)}
+    T_E_base = {k: np.mean(list(R_vals[k].values())) + 2 * np.std(list(R_vals[k].values())) for k in range(1, k_max + 1)}
 
     def classify(method='HETA'):
         res = {e: 'Global Bridge' for e in edges}
@@ -143,7 +143,7 @@ def evaluate_accuracy(detected_communities, ground_truth, all_nodes):
 # --- 4. 主執行流程 ---
 
 def main():
-    data_folder = "實驗0118/facebook"
+    data_folder = "facebook"
     ego_nodes = [0, 107, 348, 414, 686, 698, 1684, 1912, 3437, 3980]
     final_results = []
 

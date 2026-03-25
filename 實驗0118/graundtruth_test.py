@@ -42,12 +42,13 @@ def run_analysis_logic(G, alpha=0.1):
     k_max = max(1, int(np.floor(avg_path / 2)))
     edges = [tuple(sorted(e)) for e in G.edges()]
     
+    # 事前計算特徵值，避免在不同 alpha 測試中重複運算
     R_vals = {k: {e: calculate_R_ij_k(G, e[0], e[1], k) for e in edges} for k in range(1, k_max + 1)}
     D_vals = {k: {e: calculate_LD_ij_k(G, e[0], e[1], k) for e in edges} for k in range(1, k_max + 1)}
     Avg_D = {k: np.mean(list(D_vals[k].values())) for k in range(1, k_max + 1)}
-    T_E_base = {k: np.mean(list(R_vals[k].values())) + 0.5 * np.std(list(R_vals[k].values())) for k in range(1, k_max + 1)}
+    T_E_base = {k: np.mean(list(R_vals[k].values())) + 2 * np.std(list(R_vals[k].values())) for k in range(1, k_max + 1)}
 
-    def classify(method='HETA'):
+    def classify(method='HETA', current_alpha=0.1):
         res = {e: 'Global Bridge' for e in edges}
         for e in edges:
             if G.degree(e[0]) == 1 or G.degree(e[1]) == 1: res[e] = 'Silk'
@@ -58,7 +59,7 @@ def run_analysis_logic(G, alpha=0.1):
             for e in remaining:
                 if method == 'LDHETA' and Avg_D[k] > 0:
                     g_ij = D_vals[k][e] / Avg_D[k]
-                    threshold_multiplier = (1 + alpha * (g_ij - 1))
+                    threshold_multiplier = (1 + current_alpha * (g_ij - 1))
                 else:
                     threshold_multiplier = 1
                 
@@ -67,17 +68,17 @@ def run_analysis_logic(G, alpha=0.1):
             remaining = [e for e in remaining if e not in bonds]
         return res
 
-    return classify('HETA'), classify('LDHETA')
+    return classify('HETA'), classify('LDHETA', alpha)
 
 # --- 2. 準確度評估工具 ---
 
 def load_facebook_data(node_id):
-    edge_file = f"實驗0118/facebook/{node_id}.edges"
+    edge_file = f"facebook/{node_id}.edges"
     if not os.path.exists(edge_file):
         raise FileNotFoundError(f"找不到邊界檔案: {edge_file}")
     G = nx.read_edgelist(edge_file, nodetype=int)
     
-    circle_file = f"實驗0118/facebook/{node_id}.circles"
+    circle_file = f"facebook/{node_id}.circles"
     ground_truth_communities = []
     if os.path.exists(circle_file):
         with open(circle_file, 'r') as f:
@@ -107,66 +108,48 @@ def extract_bond_communities(G, res_dict):
     tmp_G.add_edges_from(bond_edges)
     return [list(c) for c in nx.connected_components(tmp_G)]
 
-# --- 3. 執行批量實驗 ---
+# --- 3. 執行主程式 ---
 
-def run_batch_experiment(alpha_value):
-    """
-    接收 alpha 值，並對指定的社交圈跑完一遍實驗
-    """
+if __name__ == "__main__":
     ego_nodes = [0, 107, 348, 414, 686, 698, 1684, 1912, 3437, 3980]
-    results = []
-
-    print(f"\n>>> 正在測試 alpha = {alpha_value} <<<")
-    print(f"{'NodeID':<8} | {'HETA NMI':<10} | {'LDHETA NMI':<10} | {'Improvement':<10}")
-    print("-" * 50)
+    alpha_list = [-10.0, -8.0, -6.0, -4.0, -2.0, -1.5, -1.0, -0.5, -0.1, 0.0, 0.1, 0.5, 1.0, 1.5, 2.0, 4.0, 6.0, 8.0, 10.0]
+    all_results = []
 
     for node_id in ego_nodes:
+        print(f"\n>>> 正在分析網路節點: {node_id} <<<")
+        print(f"{'Alpha':<8} | {'HETA NMI':<10} | {'LDHETA NMI':<10} | {'Improvement':<10}")
+        print("-" * 50)
+        
         try:
             G, ground_truth = load_facebook_data(node_id)
             all_nodes = set(G.nodes())
+            
+            # 針對同一個網路，測試所有 alpha
+            for a in alpha_list:
+                h_res, ld_res = run_analysis_logic(G, alpha=a)
 
-            # 傳入目前的 alpha 值
-            h_res, ld_res = run_analysis_logic(G, alpha=alpha_value)
-
-            h_comm = extract_bond_communities(G, h_res)
-            ld_comm = extract_bond_communities(G, ld_res)
-            
-            h_nmi = evaluate_accuracy(h_comm, ground_truth, all_nodes)
-            ld_nmi = evaluate_accuracy(ld_comm, ground_truth, all_nodes)
-            
-            improvement = ((ld_nmi - h_nmi) / h_nmi * 100) if h_nmi > 0 else 0
-            
-            results.append({
-                'Alpha': alpha_value,
-                'Node': node_id,
-                'HETA_NMI': round(h_nmi, 4),
-                'LDHETA_NMI': round(ld_nmi, 4),
-                'Improvement_%': round(improvement, 2)
-            })
-            
-            print(f"{node_id:<8} | {h_nmi:<10.4f} | {ld_nmi:<10.4f} | {improvement:>9.2f}%")
-
+                h_comm = extract_bond_communities(G, h_res)
+                ld_comm = extract_bond_communities(G, ld_res)
+                
+                h_nmi = evaluate_accuracy(h_comm, ground_truth, all_nodes)
+                ld_nmi = evaluate_accuracy(ld_comm, ground_truth, all_nodes)
+                
+                improvement = ((ld_nmi - h_nmi) / h_nmi * 100) if h_nmi > 0 else 0
+                
+                all_results.append({
+                    'Node': node_id,
+                    'Alpha': a,
+                    'HETA_NMI': round(h_nmi, 4),
+                    'LDHETA_NMI': round(ld_nmi, 4),
+                    'Improvement_%': round(improvement, 2)
+                })
+                
+                print(f"{a:<8} | {h_nmi:<10.4f} | {ld_nmi:<10.4f} | {improvement:>9.2f}%")
+        
         except Exception as e:
-            print(f"節點 {node_id} 運算跳過: {e}")
+            print(f"節點 {node_id} 處理失敗: {e}")
 
-    df_res = pd.DataFrame(results)
-    avg_imp = df_res['Improvement_%'].mean()
-    print("-" * 50)
-    print(f"Alpha {alpha_value} 平均改進率: {avg_imp:.2f}%")
-    return df_res
-
-# --- 4. Main 區塊 ---
-
-if __name__ == "__main__":
-    # 使用陣列依序測試不同的 alpha 值
-    alpha_list = [-2.0, -1.5, -1.0, -0.5, -0.1, 0.0, 0.1, 0.5, 1.0, 1.5, 2.0]
-    all_reports = []
-
-    for a in alpha_list:
-        report = run_batch_experiment(a)
-        all_reports.append(report)
-
-    # 合併所有測試結果並儲存
-    final_df = pd.concat(all_reports)
-    final_df.to_csv("facebook_alpha_test_results.csv", index=False)
-    print("\n所有 alpha 測試完成，結果已儲存至 facebook_alpha_test_results.csv")
+    # 儲存結果
+    final_df = pd.DataFrame(all_results)
+    final_df.to_csv("facebook_per_node_alpha_results.csv", index=False)
+    print("\n測試完成，結果已儲存至 facebook_per_node_alpha_results.csv")
