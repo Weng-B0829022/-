@@ -1,0 +1,13 @@
+1. DBSCAN (1996)核心：密度定義與雜訊剔除這篇論文挑戰了當時主流的「基於距離（如 K-means）」或「基於機率分布」的邏輯。詳細內容： 作者提出，一個群集應該是「高密度區域」，被「低密度區域」所分隔。他們定義了兩個參數：$\epsilon$ (半徑) 與 $MinPts$ (最少點數)。只要在半徑內有點，就往外擴張。
+
+2.DPC Clustering by fast search and find of density peaks
+
+3. 2020：Adaptive KNN (解決 $d_c$ 難調)
+* 代表論文： “An improved density peak clustering algorithm based on K-nearest neighbors” (通常指由 Gao et al. 或相關變體在 2020 年左右完善的研究)。
+
+4. 2022：Deep Embedding (解決高維度與語意)
+* 代表論文： “Deep Density Peak Clustering (DDC)” (發表於 Information Sciences 或相關頂級 AI 期刊)。
+
+5. 2024：Graph Manifold (解決複雜幾何分配錯誤)
+* 代表論文： “G-DPC: Graph-driven Density Peak Clustering via Shared Nearest Neighbors”。
+
